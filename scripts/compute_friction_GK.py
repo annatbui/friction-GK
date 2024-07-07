@@ -48,12 +48,12 @@ def get_user_inputs():
         description="Computing the friction coefficient from the Green-Kubo relation."
     )
 
-    parser.add_argument("-ifile", "--input_file",
+    parser.add_argument("-in", "--input_file",
         required=True, type=str, default=None,
         help="the relative path to the file containing the summed forces.",
     )
 
-    parser.add_argument("-ofile", "--output_file",
+    parser.add_argument("-out", "--output_file",
         required=False, type=str, default="friction_GK.txt",
         help="name of the output file with the results",
     )
@@ -141,17 +141,21 @@ def compute_prefactor(path_to_datafile: str, temperature: float):
     Returns:
         prefactor (float): beta/area for friction.
     """
-    x, y = None, None  # Initialize x and y to ensure they are defined
-
+    x, y = None, None  
+    
     try:
         with open(path_to_datafile, 'r') as f:
             for line in f:
                 if 'xlo xhi' in line:
-                    x = float(line.split()[1])  # Extract x dimension
+                    xlo = float(line.split()[0])  
+                    xhi = float(line.split()[1])
+                    x = xhi - xlo 
                 elif 'ylo yhi' in line:
-                    y = float(line.split()[1])  # Extract y dimension
+                    ylo = float(line.split()[0])
+                    yhi = float(line.split()[1])
+                    y = yhi - ylo
                 if x is not None and y is not None:
-                    break  # Exit loop if both dimensions are found
+                    break  
     except FileNotFoundError:
         raise FileNotFoundError(f"Data file {path_to_datafile} not found.")
 
@@ -334,11 +338,19 @@ def write_output_to_file(results_array, path_to_output):
 
     df = pd.DataFrame(results_array)
 
-    df.columns = ["Time [fs]",
-                         "F(t)*F(0) [(kcal/mole/A)^2]",
-                         "error F(t)*F(0) [(kcal/mole/A)^2]",
-                         "lambda [N*s/m^3]",
-                         "error lambda [N*s/m^3]"]
+    time = "t / fs"
+    acf = "F(t)*F(0) / (kcal/mole/A)^2"
+    se_acf = "err[F(t)*F(0)] / (kcal/mole/A)^2"
+    friction = "lambda / N*s/m^3"
+    se_friction = "err[lambda] / N*s/m^3"
+    
+    df.columns = [time, acf, se_acf, friction, se_friction]
+    
+    df[time] = df[time].map("{:.2f}".format)
+    df[acf] = df[acf].map("{:.6f}".format)
+    df[se_acf] = df[se_acf].map("{:.6f}".format)
+    df[friction] = df[friction].map("{:.6f}".format)
+    df[se_friction] = df[se_friction].map("{:.6f}".format)
     
     df.to_csv(path_to_output, index=False, sep='\t', header=True)
 
