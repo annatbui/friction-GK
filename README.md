@@ -12,7 +12,9 @@ For the equations used for the calculation of an example, see the notebook in th
 
 ## Citation
 
-*** A. T. Bui, S. J. Cox, "Hydrodynamic slippage from microscopic forces for nanofluidic transport", 2024***
+For the theory and application of the Green-Kubo formula, please see:
+
+***A. T. Bui, S. J. Cox, "Hydrodynamic slippage from microscopic forces for nanofluidic transport", 2024***
 
 ## Installation
 
