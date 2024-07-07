@@ -25,6 +25,7 @@ Requirements:
 - Pandas
 - Argparse
 - Matplotlib
+- tqdm
 
 Simply clone the repository:
 ```sh
