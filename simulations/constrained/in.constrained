@@ -1,0 +1,121 @@
+############################################################
+# setting up the system
+############################################################
+
+units                           real
+dimension                       3
+boundary                        p p p
+atom_style                      full
+variable                        T equal 298
+variable                        dt equal 1
+timestep                        ${dt}
+#processors                      * * 1
+variable                        height equal 27.4983
+
+
+############################################################
+# setup atoms 
+############################################################
+
+bond_style harmonic
+angle_style harmonic
+
+read_data fluid_solid.data
+
+
+set type 1 charge -0.8476
+set type 2 charge 0.4238
+set type 3 charge 0.0
+set type 4 charge 0.0
+
+group fluid type 1 2 
+group solidwalls type 3 4
+group botwall type 3
+group topwall type 4
+group oxygen type 1
+group hydrogen type 2
+
+
+############################################################
+## potential energy	
+############################################################
+
+include potentials.pot
+
+neighbor        2.0 bin
+neigh_modify    delay 0 every 1 check yes
+
+#############################################################
+## equilibration
+#############################################################
+
+compute top_height topwall reduce min z
+compute bot_height botwall reduce max z
+variable displacement equal ${height}-(c_top_height-c_bot_height)
+
+
+compute fluid_temp fluid temp
+compute fluid_com fluid temp/com
+
+thermo_style    custom step c_fluid_temp c_top_height c_bot_height etotal pe ke
+
+thermo          1000
+thermo_modify lost warn flush yes
+
+
+#dump equi_dump all custom 1000 prod.lammpsdump id type xu yu zu vx vy vz q
+
+velocity      fluid create ${T}  345862 mom yes rot yes dist gaussian loop local
+velocity      solidwalls set 0.0 0.0 0.0
+
+
+run 0
+
+displace_atoms topwall move 0 0 ${displacement}
+
+
+#############################################################
+## constraint on momentum of the fluid
+#############################################################
+
+fix zeromomentum fluid momentum 1 linear 1 1 0 rescale 
+fix NVT_F fluid nvt temp ${T} ${T} $(100*dt) tchain 5
+fix_modify NVT_F temp fluid_com
+
+fix RIGID fluid rattle 1E-5 200000 0 b 1 1 a 1
+
+
+run 1000000
+
+#write_data fluid_solid.data
+undump equi_dump
+reset_timestep 0
+
+
+#############################################################
+## production
+#############################################################
+
+
+
+compute summed_force_liquid fluid reduce sum fx fy
+variable summed_force_x equal c_summed_force_liquid[1]
+variable summed_force_y equal c_summed_force_liquid[2]
+fix print_summed_forces all print 1 "${summed_force_x} ${summed_force_y}" file summed_forces.out screen no title "Fx Fy"
+
+#compute friction_force fluid group/group solidwalls 
+#variable summed_force_fs_x equal c_friction_force[1]
+#variable summed_force_fs_y equal c_friction_force[2]
+#fix print_summed_forces_fs all print 1 "${summed_force_fs_x} ${summed_force_fs_y}" file summed_forces.out screen no title "F_x F_y"
+
+
+
+#dump prod_dump all custom 10000 prod.lammpsdump id type xu yu zu vx vy vz q
+
+restart 1000000 restart.*.nvt
+timestep ${dt}
+run 10000000
+
+
+
+

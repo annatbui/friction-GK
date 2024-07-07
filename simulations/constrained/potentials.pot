@@ -1,0 +1,20 @@
+pair_style lj/cut/coul/long 10 
+pair_modify shift no mix arithmetic
+bond_style harmonic
+angle_style harmonic
+kspace_style pppm 1e-5
+
+
+pair_coeff 1 1 0.155402 3.166
+pair_coeff 2 2 0.0 0.0
+
+pair_coeff 3 3 5.29 2.951
+pair_coeff 4 4 5.29 2.951
+
+pair_coeff 1 3 0.2720053164 3.0585
+pair_coeff 1 4 0.2720053164 3.0585
+
+bond_coeff 1 100 1.000
+angle_coeff 1 300 109.470
+
+
