@@ -14,10 +14,9 @@ For the equations used for the calculation of an example, see the notebook in th
 
 For the theory and application of the Green-Kubo formula, please see:
 
-***A. T. Bui, S. J. Cox, "Flow is slow at the nanoscale: Revisiting the Green-Kubo relation for friction"
-(2024)***
+***A. T. Bui, S. J. Cox, "Revisiting the Green–Kubo relation for friction in nanofluidics", J. Chem. Phys. 161, 201102 (2024)***
 
-Links to: [Preprint](https://doi.org/10.48550/arXiv.2409.07134)
+Links to: [Preprint](https://doi.org/10.48550/arXiv.2409.07134) | [Journal](https://doi.org/10.1063/5.0238363)
 
 ## Installation
 
